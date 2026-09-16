@@ -63,12 +63,14 @@ def handle_login(contact_info, birth_date_str):
             gr.update(visible=True)
         )
 
-# دالة الشات التفاعلي مع تغيير لون وحالة الثعلب اللطيف
 def fox_chat_assistant(user_message, history):
     if not user_message or user_message.strip() == "":
         return "", history
 
-    # 🔴 الحالة الحمراء: الثعلب يتحول للون الأحمر الغاضب والمنبه
+    if history is None:
+        history = []
+
+    # 🔴 الحالة الحمراء: الثعلب الأحمر
     found_high = [word for word in HIGH_RISK if word in user_message]
     if found_high:
         censored = user_message
@@ -84,7 +86,7 @@ def fox_chat_assistant(user_message, history):
         history.append((user_message, reply))
         return "", history
 
-    # 💛 الحالة الصفراء: الثعلب يتحول للون الأصفر الحذر والمفكر
+    # 💛 الحالة الصفراء: الثعلب الأصفر
     found_medium = [word for word in MEDIUM_RISK if word in user_message]
     if found_medium:
         censored = user_message
@@ -100,7 +102,7 @@ def fox_chat_assistant(user_message, history):
         history.append((user_message, reply))
         return "", history
 
-    # 💙 الحالة الزرقاء/الوردية: الثعلب الكيوت السعيد واللطيف
+    # 💙 الحالة الزرقاء: الثعلب الأزرق/الوردي اللطيف
     msg_lower = user_message.lower()
     if "رابط" in msg_lower or "غريب" in msg_lower:
         reply = "💙💙💙\n🦊✨ **الثعلب الأزرق الكيوت:**\nإذا وصلك رابط غريب لا تفتحه أبداً، استأذن بابا أو ماما أولاً يا بطل!"
@@ -142,19 +144,20 @@ with gr.Blocks(theme=gr.themes.Soft(), title="نظام الحارس الذكي |
         birth_in = gr.Textbox(label="تاريخ الميلاد (السنة-الشهر-اليوم)", value="2010-01-01", placeholder="YYYY-MM-DD")
         login_btn = gr.Button("دخول للنظام 🚀", variant="primary")
 
-    # 2️⃣ واجهة الصغار (< 18 سنة): الثعلب اللطيف المتغير الألوان
+    # 2️⃣ واجهة الصغار (< 18 سنة)
     with gr.Column(visible=False) as junior_view:
         gr.Markdown("## 🦊💖 الثعلب اللطيف (يتغير شكله ولونه مع الرسائل)")
         gr.Markdown("تحدث مع الثعلب الكيوت: **💙 أزرق/وردي (آمن ولطيف)** | **💛 أصفر (محذر ومفكر)** | **🔴 أحمر (غاضب ومحظر)**")
         
-        chatbot = gr.Chatbot(label="المحادثة مع الثعلب الكيوت 🦊✨", height=420)
+        # تم تحديد type="tuples" لضمان التوافق التام مع الإصدارات الجديدة
+        chatbot = gr.Chatbot(label="المحادثة مع الثعلب الكيوت 🦊✨", height=420, type="tuples")
         msg_input = gr.Textbox(placeholder="اكتب رسالتك للثعلب اللطيف هنا واضغط Enter...", label="رسالتك")
         send_btn = gr.Button("إرسال للثعلب 🚀", variant="primary")
         clear_btn = gr.Button("مسح المحادثة 🗑️")
 
         send_btn.click(fox_chat_assistant, inputs=[msg_input, chatbot], outputs=[msg_input, chatbot])
         msg_input.submit(fox_chat_assistant, inputs=[msg_input, chatbot], outputs=[msg_input, chatbot])
-        clear_btn.click(lambda: None, None, chatbot, queue=False)
+        clear_btn.click(lambda: [], None, chatbot, queue=False)
 
     # 3️⃣ واجهة الكبار (>= 18 سنة)
     with gr.Column(visible=False) as senior_view:
